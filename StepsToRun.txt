@@ -1,0 +1,39 @@
+# Build the image (Here ./dot => build context)
+    docker build .
+
+# Build and Tag the docker image (easy instead of remembering image id can use tag {name of image})
+    docker build -t mananparuthi/simpleweb .
+
+
+
+# Start the container from the image
+    docker run mananparuthi/simpleweb 
+
+
+
+# Container has separate resources => also different network
+# When we hit the url from local system's browser it will not work
+# So, we need to do the "container port mapping" to transfer the incoming request from local network to container's network for a particular port
+# Request on localhost:8181 on local network => transfer on localhost:8080 to the container's network
+# Limitation only on the incoming requests not on the outgoing requests
+# Setup Port Forwarding (Runtime Constraint) 
+# Route incoming requests to 8181 port on localhost {source network} to 8080 port inside the container {destination network}
+    docker run -p 8181:8080 mananparuthi/simpleweb
+    
+
+
+# To debug inside the container's environment (Open-up shells => so we can type commands inside container)
+    docker run -it mananparuthi/simpleweb sh
+
+# To get id's of all the running containers
+    docker ps
+# To startup a second process inside a running container (second process here => debug in shell) 
+# -it flag => to attach standard input & formatted terminal
+    docker exec -it <container-id> sh 
+
+
+
+# Creating container => taking snapshot of the file system; so if any changes are made in the code then change is not reflected inside the container => and we need to rebuild the container (re-run the docker build command) to reflect those changes => copy and every step is executed again (not from cache) just because of this small change to the code
+# So to handle this we split the COPY instruction step 
+# => Copy only package.json and it is only needed for npm install 
+# => Then Copy the other code files in the next step after npm install (as those are not related with npm i command)
